@@ -1,0 +1,11 @@
+# Claude Code 本機設定
+.claude/
+
+# 設計參考圖（檔案過大，不納入版控）
+src_images/
+
+# 匯出備份
+output/
+
+# macOS
+.DS_Store
