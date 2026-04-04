@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="2026 台灣行銷年度行事曆 — 節日、電商檔期、24節氣、國定假日一覽">
+  <title>2026 行銷年度行事曆</title>
+  <style>
+    /* ===================================================
+       CSS Custom Properties — 所有顏色必須透過變數定義
+       =================================================== */
+    :root {
+      /* 類別品牌色（主題無關） */
+      --color-tw:    #ff6b6b;
+      --color-ec:    #34d399;
+      --color-local: #fb923c;
+      --color-intl:  #a78bfa;
+      --color-life:  #60a5fa;
+
+      /* 邊距與圓角 */
+      --r-sm: 6px;
+      --r-md: 10px;
+      --r-lg: 16px;
+      --trans: 0.2s ease;
+
+      /* 間距 */
+      --max-w: 1200px;
+    }
+
+    /* 暗色主題（預設） */
+    [data-theme="dark"] {
+      --bg-page:    #0f0f1a;
+      --bg-card:    #16182a;
+      --bg-elevated:#1e2040;
+      --text-main:  #e2e8f0;
+      --text-muted: #94a3b8;
+      --border:     #2d3058;
+      --accent:     #818cf8;
+      --accent-bg:  rgba(129,140,248,0.12);
+      --shadow:     0 4px 24px rgba(0,0,0,0.45);
+      --glow-cur:   0 0 0 2px var(--accent), 0 0 24px rgba(129,140,248,0.2);
+      --cpm-high-bg:   rgba(255,107,107,0.08);
+      --cpm-high-txt:  #fca5a5;
+      --cpm-med-bg:    rgba(251,146,60,0.08);
+      --cpm-med-txt:   #fdba74;
+      --cpm-low-bg:    rgba(52,211,153,0.08);
+      --cpm-low-txt:   #6ee7b7;
+    }
+
+    /* 亮色主題 */
+    [data-theme="light"] {
+      --bg-page:    #f0f4ff;
+      --bg-card:    #ffffff;
+      --bg-elevated:#eef2ff;
+      --text-main:  #1e293b;
+      --text-muted: #64748b;
+      --border:     #e2e8f0;
+      --accent:     #4f46e5;
+      --accent-bg:  rgba(79,70,229,0.08);
+      --shadow:     0 4px 24px rgba(0,0,0,0.08);
+      --glow-cur:   0 0 0 2px var(--accent), 0 0 20px rgba(79,70,229,0.12);
+      --cpm-high-bg:   rgba(220,38,38,0.06);
+      --cpm-high-txt:  #dc2626;
+      --cpm-med-bg:    rgba(217,119,6,0.06);
+      --cpm-med-txt:   #d97706;
+      --cpm-low-bg:    rgba(5,150,105,0.06);
+      --cpm-low-txt:   #059669;
+    }
+
+    /* ===================================================
+       Reset & Base
+       =================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      transition: background var(--trans), color var(--trans);
+    }
+    button { font-family: inherit; cursor: pointer; }
+    select { font-family: inherit; }
+    mark   { background: rgba(251,191,36,0.3); color: inherit; border-radius: 2px; padding: 0 2px; }
+
+    /* ===================================================
+       Loading Overlay
+       =================================================== */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.8rem;
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+    .loading-overlay.active { display: flex; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===================================================
+       Header
+       =================================================== */
+    .site-header {
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 1rem 0.8rem;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .site-header h1 {
+      font-size: clamp(1.3rem, 4vw, 1.9rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--color-tw));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+    .header-stats {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .stat-chip {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .stat-chip strong { color: var(--accent); font-size: 1rem; font-weight: 700; }
+    .theme-btn {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0.35rem 0.6rem;
+      color: var(--text-muted);
+      font-size: 1rem;
+      transition: all var(--trans);
+    }
+    .theme-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ===================================================
+       Month Navigation
+       =================================================== */
+    .month-nav {
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      display: flex;
+      gap: 0.3rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      position: sticky;
+      top: 0;
+      z-index: 99;
+    }
+    .month-nav::-webkit-scrollbar { display: none; }
+    .month-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0.25rem 0.55rem;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all var(--trans);
+    }
+    .month-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .month-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* ===================================================
+       Filters
+       =================================================== */
+    .filters-section {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 0.7rem 1rem;
+    }
+    .filters-row {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      align-items: center;
+    }
+    .filter-label { font-size: 0.73rem; color: var(--text-muted); white-space: nowrap; }
+    .filter-group { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .cat-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.22rem 0.65rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      transition: all var(--trans);
+      white-space: nowrap;
+    }
+    .cat-btn:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+    /* 類別 active 狀態 — 使用行內 style 透過 JS 動態設定顏色 */
+    .cat-btn.active { color: #fff; font-weight: 600; }
+    .cat-btn[data-cat="ec"].active { color: #1a1a1a; }  /* 綠底配深色文字 */
+
+    .industry-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0.28rem 0.6rem;
+      color: var(--text-main);
+      font-size: 0.78rem;
+    }
+    .search-wrap { position: relative; margin-left: auto; }
+    .search-input {
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0.28rem 3.5rem 0.28rem 1.9rem;
+      color: var(--text-main);
+      font-size: 0.82rem;
+      width: 210px;
+      transition: border-color var(--trans), width var(--trans);
+    }
+    .search-input:focus { outline: none; border-color: var(--accent); width: 260px; }
+    .search-icon { position: absolute; left: 0.5rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; pointer-events: none; }
+    .kbd-hint {
+      position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%);
+      font-size: 0.62rem; color: var(--text-muted);
+      background: var(--border); padding: 0.1rem 0.3rem; border-radius: 3px;
+      pointer-events: none;
+    }
+    .search-input:focus ~ .kbd-hint { display: none; }
+
+    /* ===================================================
+       Countdown Banner
+       =================================================== */
+    .countdown-banner {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 0.55rem 1rem;
+    }
+    .countdown-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .countdown-label { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; }
+    .countdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: var(--r-sm);
+      font-size: 0.78rem;
+      border: 1px solid;
+    }
+    .countdown-item.hot    { background: rgba(255,107,107,0.08); border-color: var(--color-tw);    color: var(--color-tw);    }
+    .countdown-item.warm   { background: rgba(251,146,60,0.08);  border-color: var(--color-local); color: var(--color-local); }
+    .countdown-item.normal { background: var(--accent-bg);       border-color: var(--accent);      color: var(--accent);      }
+    .countdown-item .days  { font-size: 1.05rem; font-weight: 800; }
+
+    /* ===================================================
+       View Tabs
+       =================================================== */
+    .view-tabs-wrap {
+      max-width: var(--max-w);
+      margin: 1rem auto 0;
+      padding: 0 1rem;
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .view-tabs-wrap::-webkit-scrollbar { display: none; }
+    .view-tab {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0.45rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.83rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all var(--trans);
+    }
+    .view-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+    .view-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+
+    /* ===================================================
+       Main Wrapper
+       =================================================== */
+    .main-content {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* ===================================================
+       視圖 A — 月份卡片 Grid
+       =================================================== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin-top: 0.5rem;
+    }
+    @media (max-width: 1050px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px)  { .cards-grid { grid-template-columns: 1fr; } }
+
+    .month-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      animation: fadeUp 0.35s ease both;
+      transition: box-shadow var(--trans);
+    }
+    .month-card.current-month { box-shadow: var(--glow-cur); }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 卡片標頭 */
+    .card-header {
+      padding: 0.9rem 1rem 0.6rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .month-title { font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
+    .month-en    { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.1rem; }
+    .quarter-badge {
+      background: var(--accent-bg);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: 4px;
+      padding: 0.12rem 0.4rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* 節氣列 */
+    .solar-terms-row {
+      padding: 0.35rem 1rem;
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+      background: rgba(96,165,250,0.04);
+    }
+    .term-badge {
+      background: rgba(96,165,250,0.1);
+      color: var(--color-life);
+      border-radius: 4px;
+      padding: 0.08rem 0.4rem;
+      font-size: 0.68rem;
+    }
+
+    /* CPM 警示 */
+    .cpm-alert {
+      padding: 0.38rem 1rem;
+      font-size: 0.73rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .cpm-alert.high   { background: var(--cpm-high-bg); color: var(--cpm-high-txt); }
+    .cpm-alert.medium { background: var(--cpm-med-bg);  color: var(--cpm-med-txt);  }
+    .cpm-alert.low    { background: var(--cpm-low-bg);  color: var(--cpm-low-txt);  }
+
+    /* 事件列表 */
+    .event-list { padding: 0.3rem 0; }
+    .event-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.32rem 1rem;
+      font-size: 0.8rem;
+      transition: background var(--trans);
+    }
+    .event-item:hover { background: rgba(255,255,255,0.03); }
+    .event-item.collapsed { display: none; }
+    .event-date {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      min-width: 2.6rem;
+      flex-shrink: 0;
+    }
+    .cat-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .event-name { flex: 1; font-weight: 500; }
+    .lead-badge {
+      background: var(--accent-bg);
+      color: var(--accent);
+      border-radius: 3px;
+      padding: 0.04rem 0.32rem;
+      font-size: 0.65rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .prio-icon { font-size: 0.65rem; flex-shrink: 0; }
+
+    /* 展開按鈕 */
+    .expand-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 0.45rem;
+      background: none;
+      border: none;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.73rem;
+      transition: all var(--trans);
+    }
+    .expand-btn:hover { color: var(--accent); background: var(--accent-bg); }
+
+    /* 行銷議題標籤 */
+    .topics-row {
+      padding: 0.45rem 1rem 0.6rem;
+      display: flex;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+    }
+    .topic-tag {
+      font-size: 0.67rem;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.04);
+      border-radius: 3px;
+      padding: 0.08rem 0.38rem;
+    }
+
+    /* 空月 */
+    .no-events {
+      padding: 0.6rem 1rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* ===================================================
+       視圖 B — 行銷規劃列表
+       =================================================== */
+    .list-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-top: 0.5rem;
+    }
+    .list-table th {
+      background: var(--bg-elevated);
+      padding: 0.65rem 0.8rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.73rem;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    .list-table td {
+      padding: 0.5rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .list-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .list-table .cell-month { font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .list-table .cell-muted { color: var(--text-muted); font-size: 0.75rem; }
+    .cat-badge-pill {
+      display: inline-block;
+      border-radius: 4px;
+      padding: 0.08rem 0.45rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .channel-list { font-size: 0.72rem; color: var(--text-muted); }
+
+    /* ===================================================
+       視圖 C — 假日 & 節氣
+       =================================================== */
+    .holiday-section { margin-top: 0.5rem; }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 1.2rem 0 0.7rem;
+      padding-bottom: 0.45rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .holiday-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.81rem;
+      margin-bottom: 1.5rem;
+    }
+    .holiday-table th {
+      background: var(--bg-elevated);
+      padding: 0.55rem 0.75rem;
+      text-align: left;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .holiday-table td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .holiday-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .days-pill {
+      display: inline-block;
+      background: rgba(52,211,153,0.1);
+      color: var(--color-ec);
+      border-radius: 4px;
+      padding: 0.08rem 0.4rem;
+      font-weight: 700;
+      font-size: 0.78rem;
+    }
+    .comp-pill {
+      display: inline-block;
+      background: rgba(251,146,60,0.1);
+      color: var(--color-local);
+      border-radius: 4px;
+      padding: 0.06rem 0.38rem;
+      font-size: 0.72rem;
+    }
+
+    /* 24 節氣格 */
+    .solar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+    }
+    .solar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 0.6rem 0.75rem;
+      text-align: center;
+      transition: box-shadow var(--trans);
+    }
+    .solar-card:hover { box-shadow: var(--shadow); }
+    .solar-card .sc-name { font-weight: 700; font-size: 0.95rem; color: var(--color-life); }
+    .solar-card .sc-date { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+
+    /* ===================================================
+       Empty State
+       =================================================== */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+    .empty-state .es-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+    /* ===================================================
+       Footer
+       =================================================== */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-top: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      line-height: 1.8;
+    }
+
+    /* ===================================================
+       Utility
+       =================================================== */
+    .hidden { display: none !important; }
+
+    /* ===================================================
+       RWD
+       =================================================== */
+    @media (max-width: 768px) {
+      .search-wrap { width: 100%; }
+      .search-input { width: 100%; }
+      .search-input:focus { width: 100%; }
+      .header-stats { gap: 0.8rem; }
+      .holiday-table { font-size: 0.73rem; }
+      .holiday-table td, .holiday-table th { padding: 0.38rem 0.4rem; }
+      .solar-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+    }
+
+    /* ===================================================
+       Print
+       =================================================== */
+    @media print {
+      .site-header, .month-nav, .filters-section,
+      .countdown-banner, .view-tabs-wrap, .theme-btn,
+      .expand-btn, .loading-overlay { display: none !important; }
+      .month-card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <span>從 Google Sheets 載入資料中…</span>
+</div>
+
+<!-- ===================================================
+     Header
+     =================================================== -->
+<header class="site-header">
+  <button class="theme-btn" id="themeBtn" aria-label="切換明暗主題">🌙</button>
+  <h1>📅 2026 行銷年度行事曆</h1>
+  <div class="header-stats">
+    <span class="stat-chip">共 <strong id="statTotal">—</strong> 個節日與檔期</span>
+    <span class="stat-chip">節氣 <strong>24</strong> 個</span>
+    <span class="stat-chip">電商檔期 <strong id="statEc">—</strong> 個</span>
+  </div>
+</header>
+
+<!-- ===================================================
+     Month Navigation
+     =================================================== -->
+<nav class="month-nav" id="monthNav" aria-label="月份快速導航">
+  <!-- 由 JS 生成 -->
+</nav>
+
+<!-- ===================================================
+     Filters
+     =================================================== -->
+<section class="filters-section" aria-label="篩選器">
+  <div class="filters-row">
+    <span class="filter-label">類別：</span>
+    <div class="filter-group" id="catGroup">
+      <button class="cat-btn" data-cat="tw">🇹🇼 台灣節慶</button>
+      <button class="cat-btn" data-cat="ec">🛒 電商檔期</button>
+      <button class="cat-btn" data-cat="local">📍 在地活動</button>
+      <button class="cat-btn" data-cat="intl">🌍 國際日</button>
+      <button class="cat-btn" data-cat="life">☀️ 生活節氣</button>
+    </div>
+    <span class="filter-label">產業：</span>
+    <select class="industry-select" id="industrySelect" aria-label="產業篩選">
+      <option value="all">全產業</option>
+      <option value="food">餐飲</option>
+      <option value="beauty">美妝</option>
+      <option value="tech">3C</option>
+      <option value="travel">旅遊</option>
+      <option value="fashion">時尚</option>
+      <option value="edu">教育</option>
+      <option value="retail">零售</option>
+    </select>
+    <div class="search-wrap">
+      <span class="search-icon" aria-hidden="true">🔍</span>
+      <input type="search" class="search-input" id="searchInput"
+             placeholder="搜尋節日… (⌘K)" aria-label="搜尋節日">
+      <span class="kbd-hint" aria-hidden="true">⌘K</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================
+     Countdown Banner
+     =================================================== -->
+<div class="countdown-banner" aria-label="重要檔期倒數">
+  <div class="countdown-inner" id="countdownInner">
+    <!-- 由 JS 生成 -->
+  </div>
+</div>
+
+<!-- ===================================================
+     View Tabs
+     =================================================== -->
+<div class="view-tabs-wrap" role="tablist" aria-label="視圖切換">
+  <button class="view-tab active" data-view="card"    role="tab" aria-selected="true">📋 月份卡片</button>
+  <button class="view-tab"        data-view="list"    role="tab" aria-selected="false">📊 行銷規劃表</button>
+  <button class="view-tab"        data-view="holiday" role="tab" aria-selected="false">🗓 假日 & 節氣</button>
+</div>
+
+<!-- ===================================================
+     Main Content
+     =================================================== -->
+<main class="main-content" id="mainContent">
+
+  <!-- 視圖 A：月份卡片 -->
+  <div id="view-card">
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+
+  <!-- 視圖 B：行銷規劃列表 -->
+  <div id="view-list" class="hidden">
+    <table class="list-table" aria-label="行銷規劃表">
+      <thead>
+        <tr>
+          <th>月份</th>
+          <th>週次</th>
+          <th>日期</th>
+          <th>節日名稱</th>
+          <th>類別</th>
+          <th>優先度</th>
+          <th>提前準備</th>
+          <th>適合產業</th>
+          <th>建議渠道</th>
+        </tr>
+      </thead>
+      <tbody id="listBody"></tbody>
+    </table>
+  </div>
+
+  <!-- 視圖 C：假日 & 節氣 -->
+  <div id="view-holiday" class="hidden">
+    <div class="holiday-section">
+      <h2 class="section-title">📅 2026 台灣國定假日與補假表</h2>
+      <table class="holiday-table" aria-label="國定假日補假表">
+        <thead>
+          <tr>
+            <th>假日名稱</th>
+            <th>國定假日日期</th>
+            <th>補假資訊</th>
+            <th>連假期間</th>
+            <th>天數</th>
+            <th>備註</th>
+          </tr>
+        </thead>
+        <tbody id="holidayBody"></tbody>
+      </table>
+      <h2 class="section-title">☀️ 2026 年 24 節氣</h2>
+      <div class="solar-grid" id="solarGrid"></div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>資料來源：行政院人事行政總處公告・農曆曆算・台灣行銷社群整理</p>
+  <p>2026 行銷年度行事曆・僅供行銷規劃參考</p>
+</footer>
+
+<script>
+// ============================================================
+// ① 設定區
+//    USE_SHEETS = true 時，需先將 Google Sheets 發布為「任何人可檢視」
+//    並將 CSV 匯出網址的 gid 填入下方
+// ============================================================
+const CONFIG = {
+  SPREADSHEET_ID: 'YOUR_SPREADSHEET_ID_HERE', // ← 替換你的試算表 ID
+  GID_EVENTS:   '0',   // ALL_EVENTS 工作表 GID
+  GID_HOLIDAYS: '1',   // HOLIDAYS 工作表 GID
+  GID_CPM:      '2',   // CPM_ALERTS 工作表 GID
+  USE_SHEETS:   false, // 設為 true 啟用 Google Sheets 資料源
+};
+
+// ============================================================
+// ② 常數與靜態資料
+// ============================================================
+
+/** 月份中英文 */
+const MONTH_ZH = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+const MONTH_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const QUARTERS = ['Q1','Q1','Q1','Q2','Q2','Q2','Q3','Q3','Q3','Q4','Q4','Q4'];
+
+/** 類別中繼資料（顏色對應 CSS 變數） */
+const CAT_META = {
+  tw:    { label: '台灣節慶', cssVar: '--color-tw'    },
+  ec:    { label: '電商檔期', cssVar: '--color-ec'    },
+  local: { label: '在地活動', cssVar: '--color-local' },
+  intl:  { label: '國際日',   cssVar: '--color-intl'  },
+  life:  { label: '生活節氣', cssVar: '--color-life'  },
+};
+
+/** 產業對照表 */
+const INDUSTRY_MAP = {
+  all: '全產業', food: '餐飲', beauty: '美妝',
+  tech: '3C', travel: '旅遊', fashion: '時尚', edu: '教育', retail: '零售',
+};
+
+// ============================================================
+// ③ 24 節氣（SOLAR_TERMS 永久寫死，不從外部載入）
+// ============================================================
+const SOLAR_TERMS = [
+  { name: '小寒', month: 1,  day: 5  },
+  { name: '大寒', month: 1,  day: 20 },
+  { name: '立春', month: 2,  day: 4  },
+  { name: '雨水', month: 2,  day: 19 },
+  { name: '驚蟄', month: 3,  day: 6  },
+  { name: '春分', month: 3,  day: 20 },
+  { name: '清明', month: 4,  day: 5  },
+  { name: '穀雨', month: 4,  day: 20 },
+  { name: '立夏', month: 5,  day: 6  },
+  { name: '小滿', month: 5,  day: 21 },
+  { name: '芒種', month: 6,  day: 7  },
+  { name: '夏至', month: 6,  day: 21 },
+  { name: '小暑', month: 7,  day: 7  },
+  { name: '大暑', month: 7,  day: 23 },
+  { name: '立秋', month: 8,  day: 7  },
+  { name: '處暑', month: 8,  day: 23 },
+  { name: '白露', month: 9,  day: 8  },
+  { name: '秋分', month: 9,  day: 23 },
+  { name: '寒露', month: 10, day: 8  },
+  { name: '霜降', month: 10, day: 23 },
+  { name: '立冬', month: 11, day: 7  },
+  { name: '小雪', month: 11, day: 22 },
+  { name: '大雪', month: 12, day: 7  },
+  { name: '冬至', month: 12, day: 22 },
+];
+
+// ============================================================
+// ④ 國定假日 Fallback（依人事行政局公告）
+// ============================================================
+const FALLBACK_HOLIDAYS = [
+  { name: '元旦',       date: '1/1 (四)',   comp: '—',               period: '1/1',                  days: 1, note: '單日假' },
+  { name: '農曆春節',   date: '2/15~2/20',  comp: '2/20 補假 (五)',   period: '2/14 (六) ~ 2/22 (日)', days: 9, note: '含補班日 2/7 (六)' },
+  { name: '和平紀念日', date: '2/28 (六)',   comp: '2/27 補假 (五)',   period: '2/27 (五) ~ 3/1 (日)',  days: 3, note: '' },
+  { name: '兒童節',     date: '4/4 (六)',    comp: '4/3 補假 (五)',    period: '4/3 (五) ~ 4/6 (一)',   days: 4, note: '含清明節 4/5' },
+  { name: '清明節',     date: '4/5 (日)',    comp: '4/6 補假 (一)',    period: '4/3 (五) ~ 4/6 (一)',   days: 4, note: '與兒童節合併連假' },
+  { name: '勞動節',     date: '5/1 (五)',    comp: '—',               period: '5/1 (五) ~ 5/3 (日)',   days: 3, note: '勞工專屬假日' },
+  { name: '端午節',     date: '6/19 (五)',   comp: '—',               period: '6/19 (五) ~ 6/21 (日)', days: 3, note: '' },
+  { name: '中秋節',     date: '9/25 (五)',   comp: '—',               period: '9/25 (五) ~ 9/28 (一)', days: 4, note: '含教師節 9/28 補假' },
+  { name: '國慶日',     date: '10/10 (六)',  comp: '10/9 補假 (五)',   period: '10/9 (五) ~ 10/11 (日)',days: 3, note: '' },
+  { name: '臺灣光復節', date: '10/25 (日)',  comp: '10/26 補假 (一)',  period: '10/24 (六) ~ 10/26 (一)',days:3, note: '' },
+  { name: '行憲紀念日', date: '12/25 (五)',  comp: '—',               period: '12/25 (五) ~ 12/27 (日)',days:3, note: '耶誕連假' },
+];
+
+// ============================================================
+// ⑤ CPM 警示 Fallback（1-12 月）
+// ============================================================
+const FALLBACK_CPM = {
+  1:  { level: 'high',   msg: '🔴 春節備戰期，CPM 快速攀升，建議提前 4 週完成年節素材製作' },
+  2:  { level: 'high',   msg: '🔴 農曆春節旺季，CPM 全年最高峰，建議春節前完成投放設定' },
+  3:  { level: 'low',    msg: '🟢 春節後淡季，CPM 相對低點，適合進行品牌認知測試廣告' },
+  4:  { level: 'medium', msg: '🟡 清明連假前後電商回溫，可開始佈局母親節前置素材' },
+  5:  { level: 'high',   msg: '🔴 母親節旺季，CPM 偏高，建議 4 月下旬完成素材審核上線' },
+  6:  { level: 'high',   msg: '🔴 618 年中慶，電商 CPM 次高點，提前 3 週鎖定受眾名單' },
+  7:  { level: 'low',    msg: '🟢 暑假淡季，CPM 低點，適合增加曝光量與測試新受眾組合' },
+  8:  { level: 'medium', msg: '🟡 父親節＋七夕雙檔，流量回溫，可小額測試多組素材' },
+  9:  { level: 'high',   msg: '🔴 中秋節前 CPM 快速上升，建議 8 月底前完成所有投放設定' },
+  10: { level: 'medium', msg: '🟡 國慶連假後進入雙 11 備戰，開始累積再行銷受眾名單' },
+  11: { level: 'high',   msg: '🔴 雙 11 ＋黑色星期五，全年 CPM 第二高峰，預算須充足備援' },
+  12: { level: 'medium', msg: '🟡 雙 12 ＋耶誕節年末清倉，CPM 居高不下，聚焦高轉換受眾' },
+};
+
+// ============================================================
+// ⑥ ALL_EVENTS Fallback（全年 2026，80+ 筆）
+//    欄位：id, month, day, name, cat, priority(1-3), industry[], leadWeeks, topics[], channel[]
+//    建議渠道限定 9 種：Google關鍵字 / Google Banner / Youtube / Meta / LINE / CRM-EDM / CRM-簡訊 / Taboola / Dcard
+// ============================================================
+const FALLBACK_EVENTS = [
+  // ━━ 1月 January ━━
+  { id:'tw_0101',  month:1,  day:1,  name:'元旦',          cat:'tw',    priority:2, industry:['all'],               leadWeeks:1, topics:['新年新氣象','跨年慶典'],       channel:['Meta','Google關鍵字','CRM-EDM'] },
+  { id:'life_0105',month:1,  day:5,  name:'小寒',          cat:'life',  priority:1, industry:['all'],               leadWeeks:0, topics:['節氣養生','冬日暖身'],         channel:['Meta'] },
+  { id:'intl_0111',month:1,  day:11, name:'國際謝謝日',    cat:'intl',  priority:1, industry:['all'],               leadWeeks:1, topics:['感謝行動','品牌溫度'],         channel:['Meta','LINE'] },
+  { id:'life_0120',month:1,  day:20, name:'大寒',          cat:'life',  priority:1, industry:['all'],               leadWeeks:0, topics:['最冷時節','禦寒商品'],         channel:['Meta'] },
+  { id:'tw_0126',  month:1,  day:26, name:'年貨大街備戰',  cat:'tw',    priority:2, industry:['food','retail'],     leadWeeks:0, topics:['年貨採購','送禮首選'],         channel:['Meta','Google關鍵字','LINE'] },
+  { id:'ec_0131',  month:1,  day:31, name:'月底清倉',      cat:'ec',    priority:1, industry:['retail','fashion'],  leadWeeks:1, topics:['月底促銷','庫存出清'],         channel:['Meta','CRM-EDM'] },
+
+  // ━━ 2月 February ━━
+  { id:'life_0204',month:2,  day:4,  name:'立春',          cat:'life',  priority:1, industry:['all'],               leadWeeks:0, topics:['春天來了','萬象更新'],         channel:['Meta'] },
+  { id:'ec_0214',  month:2,  day:14, name:'情人節',        cat:'ec',    priority:3, industry:['all'],               leadWeeks:3, topics:['甜蜜告白','情侶禮盒','浪漫約會'], channel:['Meta','Google關鍵字','Youtube','CRM-EDM','LINE'] },
+  { id:'tw_0215',  month:2,  day:15, name:'農曆小年夜',    cat:'tw',    priority:2, industry:['food','retail'],     leadWeeks:1, topics:['圍爐備料','年節禮品'],         channel:['Meta','LINE'] },
+  { id:'tw_0216',  month:2,  day:16, name:'農曆除夕',      cat:'tw',    priority:3, industry:['all'],               leadWeeks:4, topics:['圍爐團圓','年夜飯','過年禮盒'], channel:['Meta','Google關鍵字','LINE','CRM-EDM','CRM-簡訊'] },
+  { id:'tw_0217',  month:2,  day:17, name:'春節初一',      cat:'tw',    priority:3, industry:['all'],               leadWeeks:4, topics:['新春賀歲','拜年紅包','開工大吉'], channel:['Meta','LINE','CRM-簡訊'] },
+  { id:'life_0219',month:2,  day:19, name:'雨水',          cat:'life',  priority:1, industry:['all'],               leadWeeks:0, topics:['春雨潤澤','節氣養生'],         channel:['Meta'] },
+  { id:'tw_0228',  month:2,  day:28, name:'和平紀念日',    cat:'tw',    priority:1, industry:['all'],               leadWeeks:1, topics:['和平共融','歷史記憶'],         channel:['Meta'] },
+
+  // ━━ 3月 March ━━
+  { id:'tw_0304',  month:3,  day:4,  name:'元宵節',        cat:'tw',    priority:2, industry:['food','retail'],     leadWeeks:2, topics:['猜燈謎','元宵湯圓','提燈遊行'], channel:['Meta','LINE','Youtube'] },
+  { id:'life_0306',month:3,  day:6,  name:'驚蟄',          cat:'life',  priority:1, industry:['all'],               leadWeeks:0, topics:['春雷響','萬物甦醒'],           channel:['Meta'] },
+  { id:'intl_0308',month:3,  day:8,  name:'國際婦女節',    cat:'intl',  priority:2, industry:['beauty','fashion'],  leadWeeks:2, topics:['女力崛起','她的故事','性別平等'], channel:['Meta','Youtube','CRM-EDM'] },
+  { id:'ec_0308',  month:3,  day:8,  name:'婦女節促銷',    cat:'ec',    priority:2, industry:['beauty','fashion'],  leadWeeks:2, topics:['女性專屬優惠','她的禮物'],     channel:['Meta','Google關鍵字','CRM-EDM'] },
+  { id:'life_0320',month:3,  day:20, name:'春分',          cat:'life',  priority:1, industry:['all'],               leadWeeks:0, topics:['晝夜等長','春暖花開'],         channel:['Meta'] },
+  { id:'intl_0322',month:3,  day:22, name:'世界水資源日',  cat:'intl',  priority:1, industry:['all'],               leadWeeks:1, topics:['愛地球','節約用水','永續品牌'], channel:['Meta','Youtube'] },
+  { id:'tw_0329',  month:3,  day:29, name:'青年節',        cat:'tw',    priority:1, industry:['edu'],               leadWeeks:1, topics:['青春活力','年輕世代'],         channel:['Meta','Dcard'] },
+
+  // ━━ 4月 April ━━
+  { id:'ec_0401',  month:4,  day:1,  name:'愚人節促銷',    cat:'ec',    priority:1, industry:['all'],               leadWeeks:1, topics:['搞笑行銷','反套路創意'],       channel:['Meta','Dcard'] },
+  { id:'tw_0404',  month:4,  day:4,  name:'兒童節',        cat:'tw',    priority:2, industry:['retail','edu'],      leadWeeks:2, topics:['親子活動','童樂時光'],         channel:['Meta','Google關鍵字','Youtube','LINE'] },
+  { id:'tw_0405',  month:4,  day:5,  name:'清明連假',      cat:'tw',    priority:2, industry:['travel','food'],     leadWeeks:2, topics:['踏青旅遊','掃墓祭祖','潤餅季'], channel:['Meta','Google關鍵字','LINE'] },
+  { id:'life_0405',month:4,  day:5,  name:'清明',          cat:'life',  priority:1, industry:['food'],              leadWeeks:0, topics:['春遊踏青','節氣飲食'],         channel:['Meta'] },
+  { id:'life_0420',month:4,  day:20, name:'穀雨',          cat:'life',  priority:1, industry:['all'],               leadWeeks:0, topics:['春雨滋潤','農忙時節'],         channel:['Meta'] },
+  { id:'intl_0422',month:4,  day:22, name:'世界地球日',    cat:'intl',  priority:2, industry:['all'],               leadWeeks:2, topics:['愛地球','永續發展','綠色生活'], channel:['Meta','Youtube','CRM-EDM'] },
+
+  // ━━ 5月 May ━━
+  { id:'tw_0501',  month:5,  day:1,  name:'勞動節',        cat:'tw',    priority:2, industry:['all'],               leadWeeks:1, topics:['勞工感謝','五一連假'],         channel:['Meta','LINE'] },
+  { id:'life_0506',month:5,  day:6,  name:'立夏',          cat:'life',  priority:1, industry:['beauty','food'],     leadWeeks:0, topics:['夏日來臨','防曬準備'],         channel:['Meta'] },
+  { id:'tw_0510',  month:5,  day:10, name:'母親節',        cat:'tw',    priority:3, industry:['all'],               leadWeeks:3, topics:['感謝媽媽','闔家歡聚'],         channel:['Meta','Google關鍵字','Youtube','CRM-EDM','LINE'] },
+  { id:'ec_0510',  month:5,  day:10, name:'母親節促銷',    cat:'ec',    priority:3, industry:['all'],               leadWeeks:3, topics:['媽媽的禮物','親子優惠','溫馨獻禮'], channel:['Meta','Google關鍵字','Youtube','CRM-EDM','LINE','CRM-簡訊'] },
+  { id:'life_0521',month:5,  day:21, name:'小滿',          cat:'life',  priority:1, industry:['food'],              leadWeeks:0, topics:['夏日養生','節氣飲食'],         channel:['Meta'] },
+  { id:'intl_0531',month:5,  day:31, name:'世界無菸日',    cat:'intl',  priority:1, industry:['all'],               leadWeeks:1, topics:['健康生活','戒菸行動'],         channel:['Meta'] },
+
+  // ━━ 6月 June ━━
+  { id:'intl_0605',month:6,  day:5,  name:'世界環境日',    cat:'intl',  priority:1, industry:['all'],               leadWeeks:1, topics:['環保永續','綠色生活'],         channel:['Meta','Youtube'] },
+  { id:'life_0607',month:6,  day:7,  name:'芒種',          cat:'life',  priority:1, industry:['food'],              leadWeeks:0, topics:['梅雨季','節氣飲食'],           channel:['Meta'] },
+  { id:'ec_0618',  month:6,  day:18, name:'618 年中慶',    cat:'ec',    priority:3, industry:['all'],               leadWeeks:3, topics:['年中清倉','618限定','大促攻略'], channel:['Meta','Google關鍵字','Google Banner','Youtube','Taboola','CRM-EDM','CRM-簡訊'] },
+  { id:'tw_0619',  month:6,  day:19, name:'端午節',        cat:'tw',    priority:3, industry:['food','all'],        leadWeeks:3, topics:['粽子季','划龍舟','端午連假','伴手禮'], channel:['Meta','Google關鍵字','LINE','CRM-EDM','CRM-簡訊'] },
+  { id:'life_0621',month:6,  day:21, name:'夏至',          cat:'life',  priority:1, industry:['beauty','food'],     leadWeeks:0, topics:['最長白晝','防曬必備','夏日特調'], channel:['Meta'] },
+
+  // ━━ 7月 July ━━
+  { id:'life_0707',month:7,  day:7,  name:'小暑',          cat:'life',  priority:1, industry:['food','beauty'],     leadWeeks:0, topics:['消暑涼品','防曬對策'],         channel:['Meta'] },
+  { id:'intl_0711',month:7,  day:11, name:'世界人口日',    cat:'intl',  priority:1, industry:['all'],               leadWeeks:1, topics:['永續未來','社會責任'],         channel:['Meta'] },
+  { id:'ec_0715',  month:7,  day:15, name:'暑期促銷',      cat:'ec',    priority:2, industry:['travel','edu','retail'], leadWeeks:2, topics:['暑假好好玩','學生優惠','親子旅遊'], channel:['Meta','Google關鍵字','Youtube','Dcard'] },
+  { id:'life_0723',month:7,  day:23, name:'大暑',          cat:'life',  priority:1, industry:['food','beauty'],     leadWeeks:0, topics:['最熱一天','消暑聖品'],         channel:['Meta'] },
+
+  // ━━ 8月 August ━━
+  { id:'life_0807',month:8,  day:7,  name:'立秋',          cat:'life',  priority:1, industry:['beauty','fashion'],  leadWeeks:0, topics:['秋意漸濃','秋季新品'],         channel:['Meta'] },
+  { id:'tw_0808',  month:8,  day:8,  name:'父親節',        cat:'tw',    priority:2, industry:['all'],               leadWeeks:2, topics:['謝謝爸爸','父親節禮物'],       channel:['Meta','Google關鍵字','CRM-EDM','LINE'] },
+  { id:'ec_0808',  month:8,  day:8,  name:'父親節促銷',    cat:'ec',    priority:2, industry:['all'],               leadWeeks:2, topics:['爸爸的禮物','男性商品'],       channel:['Meta','Google關鍵字','CRM-EDM'] },
+  { id:'tw_0820',  month:8,  day:20, name:'七夕情人節',    cat:'tw',    priority:2, industry:['all'],               leadWeeks:2, topics:['牛郎織女','七夕浪漫'],         channel:['Meta','Google關鍵字','LINE'] },
+  { id:'ec_0820',  month:8,  day:20, name:'七夕購物節',    cat:'ec',    priority:2, industry:['beauty','fashion'],  leadWeeks:2, topics:['七夕限定','情人禮盒'],         channel:['Meta','Google關鍵字','CRM-EDM'] },
+  { id:'life_0823',month:8,  day:23, name:'處暑',          cat:'life',  priority:1, industry:['beauty'],            leadWeeks:0, topics:['暑氣漸退','秋季保養'],         channel:['Meta'] },
+  { id:'tw_0828',  month:8,  day:28, name:'中元節',        cat:'tw',    priority:1, industry:['food','retail'],     leadWeeks:2, topics:['中元普渡','拜拜好物'],         channel:['Meta','LINE'] },
+
+  // ━━ 9月 September ━━
+  { id:'life_0908',month:9,  day:8,  name:'白露',          cat:'life',  priority:1, industry:['beauty','fashion'],  leadWeeks:0, topics:['秋涼入候','換季保養'],         channel:['Meta'] },
+  { id:'ec_0909',  month:9,  day:9,  name:'9.9 購物節',    cat:'ec',    priority:2, industry:['all'],               leadWeeks:2, topics:['99大促','年末衝刺起跑'],       channel:['Meta','Google關鍵字','Google Banner','CRM-EDM'] },
+  { id:'life_0923',month:9,  day:23, name:'秋分',          cat:'life',  priority:1, industry:['all'],               leadWeeks:0, topics:['秋意正濃','換季時節'],         channel:['Meta'] },
+  { id:'tw_0925',  month:9,  day:25, name:'中秋節',        cat:'tw',    priority:3, industry:['food','all'],        leadWeeks:4, topics:['月餅禮盒','烤肉好物','闔家賞月','伴手禮'], channel:['Meta','Google關鍵字','Google Banner','CRM-EDM','LINE','CRM-簡訊'] },
+  { id:'tw_0928',  month:9,  day:28, name:'教師節',        cat:'tw',    priority:1, industry:['edu'],               leadWeeks:1, topics:['感謝老師','師恩無限'],         channel:['Meta','LINE'] },
+
+  // ━━ 10月 October ━━
+  { id:'intl_1001',month:10, day:1,  name:'國際老人日',    cat:'intl',  priority:1, industry:['food','beauty'],     leadWeeks:1, topics:['銀髮族關懷','長輩好禮'],       channel:['Meta','LINE'] },
+  { id:'life_1008',month:10, day:8,  name:'寒露',          cat:'life',  priority:1, industry:['fashion','beauty'],  leadWeeks:0, topics:['秋冬換季','保暖穿搭'],         channel:['Meta'] },
+  { id:'tw_1010',  month:10, day:10, name:'國慶日',        cat:'tw',    priority:2, industry:['all'],               leadWeeks:2, topics:['雙十國慶','台灣之光'],         channel:['Meta','Youtube'] },
+  { id:'ec_1010',  month:10, day:10, name:'雙十促銷',      cat:'ec',    priority:2, industry:['all'],               leadWeeks:2, topics:['10.10限定','國慶特賣'],        channel:['Meta','Google關鍵字','CRM-EDM'] },
+  { id:'intl_1016',month:10, day:16, name:'世界糧食日',    cat:'intl',  priority:1, industry:['food'],              leadWeeks:1, topics:['珍惜糧食','永續飲食'],         channel:['Meta'] },
+  { id:'tw_1019',  month:10, day:19, name:'重陽節',        cat:'tw',    priority:1, industry:['food','retail'],     leadWeeks:2, topics:['重陽敬老','長輩關懷'],         channel:['Meta','LINE'] },
+  { id:'life_1023',month:10, day:23, name:'霜降',          cat:'life',  priority:1, industry:['food','fashion'],    leadWeeks:0, topics:['秋末初冬','進補養身'],         channel:['Meta'] },
+  { id:'ec_1031',  month:10, day:31, name:'萬聖節',        cat:'ec',    priority:2, industry:['food','retail'],     leadWeeks:2, topics:['Trick or Treat','萬聖限定','南瓜創意'], channel:['Meta','Google Banner','Youtube','Dcard'] },
+
+  // ━━ 11月 November ━━
+  { id:'life_1107',month:11, day:7,  name:'立冬',          cat:'life',  priority:1, industry:['food'],              leadWeeks:0, topics:['進補養身','冬令進補'],         channel:['Meta','LINE'] },
+  { id:'ec_1111',  month:11, day:11, name:'雙 11 購物節',  cat:'ec',    priority:3, industry:['all'],               leadWeeks:4, topics:['雙11大促','年度最大檔期','全館特賣'], channel:['Meta','Google關鍵字','Google Banner','Youtube','Taboola','CRM-EDM','CRM-簡訊'] },
+  { id:'intl_1117',month:11, day:17, name:'國際學生日',    cat:'intl',  priority:1, industry:['edu'],               leadWeeks:1, topics:['青年學習','學生優惠'],         channel:['Meta','Dcard'] },
+  { id:'life_1122',month:11, day:22, name:'小雪',          cat:'life',  priority:1, industry:['food','fashion'],    leadWeeks:0, topics:['冬日暖心','禦寒準備'],         channel:['Meta'] },
+  { id:'ec_1127',  month:11, day:27, name:'黑色星期五',    cat:'ec',    priority:3, industry:['all'],               leadWeeks:3, topics:['Black Friday','史上最低','跨境購物'], channel:['Meta','Google關鍵字','Google Banner','Youtube','Taboola','CRM-EDM'] },
+  { id:'ec_1130',  month:11, day:30, name:'網路星期一',    cat:'ec',    priority:2, industry:['tech','retail'],     leadWeeks:1, topics:['Cyber Monday','數位購物日'], channel:['Meta','Google關鍵字','CRM-EDM'] },
+
+  // ━━ 12月 December ━━
+  { id:'life_1207',month:12, day:7,  name:'大雪',          cat:'life',  priority:1, industry:['food','fashion'],    leadWeeks:0, topics:['冬季保暖','進補時節'],         channel:['Meta'] },
+  { id:'ec_1212',  month:12, day:12, name:'雙 12 購物節',  cat:'ec',    priority:2, industry:['all'],               leadWeeks:2, topics:['年末衝刺','雙12限定','清倉特賣'], channel:['Meta','Google關鍵字','Google Banner','CRM-EDM','CRM-簡訊'] },
+  { id:'tw_1222',  month:12, day:22, name:'冬至',          cat:'tw',    priority:2, industry:['food'],              leadWeeks:1, topics:['湯圓闔家','冬至養生'],         channel:['Meta','LINE','CRM-EDM'] },
+  { id:'life_1222',month:12, day:22, name:'冬至節氣',      cat:'life',  priority:1, industry:['food'],              leadWeeks:0, topics:['最短白晝','冬令進補'],         channel:['Meta'] },
+  { id:'ec_1225',  month:12, day:25, name:'耶誕節促銷',    cat:'ec',    priority:2, industry:['all'],               leadWeeks:2, topics:['聖誕好禮','交換禮物','白色聖誕'], channel:['Meta','Google關鍵字','Youtube','CRM-EDM','LINE'] },
+  { id:'tw_1225',  month:12, day:25, name:'行憲紀念日',    cat:'tw',    priority:1, industry:['all'],               leadWeeks:0, topics:['耶誕連假'],                   channel:['Meta'] },
+  { id:'tw_1231',  month:12, day:31, name:'跨年夜',        cat:'tw',    priority:2, industry:['all'],               leadWeeks:2, topics:['2026再見','跨年倒數','年終回顧'], channel:['Meta','Youtube','CRM-EDM','LINE'] },
+  { id:'ec_1231',  month:12, day:31, name:'年終清倉',      cat:'ec',    priority:2, industry:['all'],               leadWeeks:2, topics:['年末大清倉','庫存出清'],       channel:['Meta','Google關鍵字','CRM-EDM','CRM-簡訊'] },
+];
+
+// ============================================================
+// ⑦ App 狀態（單一可信來源）
+// ============================================================
+const APP_STATE = {
+  view:       'card',
+  categories: new Set(['tw','ec','local','intl','life']),
+  industry:   'all',
+  search:     '',
+  expanded:   new Set(),  // 已展開的月份 Set<number>
+  events:     [...FALLBACK_EVENTS],
+  holidays:   [...FALLBACK_HOLIDAYS],
+  cpm:        { ...FALLBACK_CPM },
+};
+
+// ============================================================
+// ⑧ localStorage 讀寫
+// ============================================================
+function saveState() {
+  try {
+    localStorage.setItem('cal_theme',    document.documentElement.dataset.theme);
+    localStorage.setItem('cal_cats',     JSON.stringify([...APP_STATE.categories]));
+    localStorage.setItem('cal_industry', APP_STATE.industry);
+    localStorage.setItem('cal_view',     APP_STATE.view);
+    localStorage.setItem('cal_expanded', JSON.stringify([...APP_STATE.expanded]));
+  } catch (_) { /* localStorage 不可用時靜默忽略 */ }
+}
+
+function loadState() {
+  try {
+    const theme = localStorage.getItem('cal_theme') || 'dark';
+    document.documentElement.dataset.theme = theme;
+    document.getElementById('themeBtn').textContent = theme === 'dark' ? '🌙' : '☀️';
+
+    const cats = localStorage.getItem('cal_cats');
+    if (cats) APP_STATE.categories = new Set(JSON.parse(cats));
+
+    const ind = localStorage.getItem('cal_industry');
+    if (ind) APP_STATE.industry = ind;
+
+    const view = localStorage.getItem('cal_view');
+    if (view) APP_STATE.view = view;
+
+    const expanded = localStorage.getItem('cal_expanded');
+    if (expanded) APP_STATE.expanded = new Set(JSON.parse(expanded));
+  } catch (_) { /* 靜默忽略 */ }
+}
+
+// ============================================================
+// ⑨ Google Sheets 資料抓取（CSV export）
+// ============================================================
+
+/** 通用 CSV 解析（支援引號內含逗號） */
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = splitCSVRow(lines[0]);
+  return lines.slice(1).map(line => {
+    const vals = splitCSVRow(line);
+    return Object.fromEntries(headers.map((h, i) => [h.trim(), (vals[i] ?? '').trim()]));
+  });
+}
+
+function splitCSVRow(line) {
+  const cols = []; let cur = ''; let inQ = false;
+  for (const ch of line) {
+    if (ch === '"') { inQ = !inQ; }
+    else if (ch === ',' && !inQ) { cols.push(cur); cur = ''; }
+    else { cur += ch; }
+  }
+  cols.push(cur);
+  return cols;
+}
+
+/** 統一的 Sheets 抓取函式，含錯誤處理與 Fallback */
+async function fetchSheetData(gid) {
+  const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SPREADSHEET_ID}/export?format=csv&gid=${gid}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  return parseCSV(text);
+}
+
+/** 從 Google Sheets 載入並覆蓋 APP_STATE */
+async function loadSheetData() {
+  if (!CONFIG.USE_SHEETS || CONFIG.SPREADSHEET_ID === 'YOUR_SPREADSHEET_ID_HERE') return;
+
+  document.getElementById('loadingOverlay').classList.add('active');
+  try {
+    const [evRows, holRows, cpmRows] = await Promise.all([
+      fetchSheetData(CONFIG.GID_EVENTS),
+      fetchSheetData(CONFIG.GID_HOLIDAYS),
+      fetchSheetData(CONFIG.GID_CPM),
+    ]);
+
+    // 映射事件資料（欄位名需與 Sheets 表頭一致）
+    if (evRows.length > 0) {
+      APP_STATE.events = evRows.map(r => ({
+        id:        r.id || `${r.cat}_${r.month}${String(+r.day).padStart(2,'0')}`,
+        month:     +r.month,
+        day:       +r.day,
+        name:      r.name,
+        cat:       r.cat,
+        priority:  +r.priority || 1,
+        industry:  r.industry  ? r.industry.split('|').map(s => s.trim()) : ['all'],
+        leadWeeks: +r.leadWeeks || 0,
+        topics:    r.topics  ? r.topics.split('|').map(s => s.trim())  : [],
+        channel:   r.channel ? r.channel.split('|').map(s => s.trim()) : [],
+      }));
+    }
+
+    // 映射假日資料
+    if (holRows.length > 0) {
+      APP_STATE.holidays = holRows.map(r => ({
+        name:   r.name,   date: r.date,   comp:   r.comp,
+        period: r.period, days: +r.days,  note:   r.note,
+      }));
+    }
+
+    // 映射 CPM 資料
+    if (cpmRows.length > 0) {
+      cpmRows.forEach(r => {
+        const m = +r.month;
+        if (m >= 1 && m <= 12) APP_STATE.cpm[m] = { level: r.level, msg: r.msg };
+      });
+    }
+
+    console.info('✅ Google Sheets 資料載入成功');
+  } catch (err) {
+    console.warn('⚠️ Google Sheets 載入失敗，使用 Fallback 資料', err);
+  } finally {
+    document.getElementById('loadingOverlay').classList.remove('active');
+  }
+}
+
+// ============================================================
+// ⑩ 篩選邏輯（類別 × 產業 = AND 交集）
+// ============================================================
+function filterEvents(events = APP_STATE.events) {
+  const { categories, industry, search } = APP_STATE;
+  const kw = search.trim().toLowerCase();
+  return events.filter(ev => {
+    if (!categories.has(ev.cat)) return false;                                     // 類別篩選
+    if (industry !== 'all' && !ev.industry.includes('all') && !ev.industry.includes(industry)) return false; // 產業篩選
+    if (kw && !ev.name.toLowerCase().includes(kw)) return false;                   // 搜尋篩選
+    return true;
+  });
+}
+
+// ============================================================
+// ⑪ 渲染工具函式
+// ============================================================
+
+/** 取得類別對應的 CSS 變數顏色字串 */
+function catColor(cat) {
+  return `var(${CAT_META[cat]?.cssVar || '--text-muted'})`;
+}
+
+/** 高亮關鍵字 */
+function highlightKeyword(text, kw) {
+  if (!kw) return text;
+  return text.replace(new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
+    s => `<mark>${s}</mark>`);
+}
+
+/** 計算 2026 年第幾週 */
+function weekOfYear(month, day) {
+  const d = new Date(2026, month - 1, day);
+  const start = new Date(2026, 0, 1);
+  return Math.ceil(((d - start) / 86400000 + start.getDay() + 1) / 7);
+}
+
+/** 統計更新 */
+function updateStats(filtered) {
+  document.getElementById('statTotal').textContent = filtered.length;
+  document.getElementById('statEc').textContent    = filtered.filter(e => e.cat === 'ec').length;
+}
+
+// ============================================================
+// ⑫ renderCards() — 月份卡片視圖
+// ============================================================
+function renderCards() {
+  const grid   = document.getElementById('cardsGrid');
+  const filtered = filterEvents();
+  const kw       = APP_STATE.search.trim().toLowerCase();
+  const curMonth = new Date().getFullYear() === 2026 ? new Date().getMonth() + 1 : null;
+  const LIMIT    = 4;
+
+  grid.innerHTML = '';
+  let hasAny = false;
+
+  for (let m = 1; m <= 12; m++) {
+    const mEvents = filtered.filter(e => e.month === m)
+      .sort((a, b) => a.day - b.day || b.priority - a.priority);
+
+    // 搜尋模式下跳過空月
+    if (mEvents.length === 0 && kw) continue;
+    hasAny = true;
+
+    const isExpanded = APP_STATE.expanded.has(m);
+    const terms      = SOLAR_TERMS.filter(t => t.month === m);
+    const cpm        = APP_STATE.cpm[m];
+
+    const card = document.createElement('article');
+    card.className = `month-card${m === curMonth ? ' current-month' : ''}`;
+    card.id        = `month-${m}`;
+    card.style.animationDelay = `${(m - 1) * 0.035}s`;
+
+    // ── 標頭 ──
+    const header = document.createElement('div');
+    header.className = 'card-header';
+    header.innerHTML = `
+      <div>
+        <div class="month-title">${m} 月 ${MONTH_ZH[m-1]}</div>
+        <div class="month-en">${MONTH_EN[m-1]}</div>
+      </div>
+      <span class="quarter-badge">${QUARTERS[m-1]}</span>`;
+    card.appendChild(header);
+
+    // ── 節氣列 ──
+    if (terms.length > 0) {
+      const row = document.createElement('div');
+      row.className = 'solar-terms-row';
+      row.innerHTML = terms.map(t => `<span class="term-badge">☀️ ${t.name} ${t.month}/${t.day}</span>`).join('');
+      card.appendChild(row);
+    }
+
+    // ── CPM 警示 ──
+    if (cpm) {
+      const alert = document.createElement('div');
+      alert.className = `cpm-alert ${cpm.level}`;
+      alert.textContent = cpm.msg;
+      card.appendChild(alert);
+    }
+
+    // ── 事件列表 ──
+    const listEl = document.createElement('div');
+    listEl.className = 'event-list';
+
+    if (mEvents.length === 0) {
+      listEl.innerHTML = `<div class="no-events">本月無符合條件的事件</div>`;
+    } else {
+      mEvents.forEach((ev, i) => {
+        const item = document.createElement('div');
+        item.className = `event-item${(!isExpanded && i >= LIMIT) ? ' collapsed' : ''}`;
+        const prio = ev.priority >= 3 ? '🔥🔥🔥' : ev.priority === 2 ? '🔥🔥' : '🔥';
+        item.innerHTML = `
+          <span class="event-date">${ev.month}/${ev.day}</span>
+          <span class="cat-dot" style="background:${catColor(ev.cat)}" title="${CAT_META[ev.cat]?.label}"></span>
+          <span class="event-name">${highlightKeyword(ev.name, kw)}</span>
+          ${ev.leadWeeks > 0 ? `<span class="lead-badge">提前 ${ev.leadWeeks}W</span>` : ''}
+          <span class="prio-icon" title="優先度">${prio}</span>`;
+        listEl.appendChild(item);
+      });
+    }
+    card.appendChild(listEl);
+
+    // ── 展開按鈕 ──
+    if (mEvents.length > LIMIT) {
+      const remain = mEvents.length - LIMIT;
+      const btn    = document.createElement('button');
+      btn.className   = 'expand-btn';
+      btn.textContent = isExpanded ? '▲ 收合' : `▼ 還有 ${remain} 個事件`;
+      btn.addEventListener('click', () => {
+        if (APP_STATE.expanded.has(m)) APP_STATE.expanded.delete(m);
+        else APP_STATE.expanded.add(m);
+        saveState();
+        renderCards();
+      });
+      card.appendChild(btn);
+    }
+
+    // ── 行銷議題標籤 ──
+    const allTopics = [...new Set(mEvents.flatMap(e => e.topics))].slice(0, 6);
+    if (allTopics.length > 0) {
+      const row = document.createElement('div');
+      row.className = 'topics-row';
+      row.innerHTML  = allTopics.map(t => `<span class="topic-tag">#${t}</span>`).join('');
+      card.appendChild(row);
+    }
+
+    grid.appendChild(card);
+  }
+
+  if (!hasAny) {
+    grid.innerHTML = `<div class="empty-state"><div class="es-icon">🔍</div><p>沒有找到符合條件的事件</p></div>`;
+  }
+
+  updateStats(filtered);
+}
+
+// ============================================================
+// ⑬ renderList() — 行銷規劃列表
+// ============================================================
+function renderList() {
+  const tbody   = document.getElementById('listBody');
+  const filtered = filterEvents().sort((a, b) => a.month - b.month || a.day - b.day);
+  const kw       = APP_STATE.search.trim().toLowerCase();
+
+  tbody.innerHTML = '';
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="es-icon">🔍</div><p>沒有符合條件的事件</p></div></td></tr>`;
+    updateStats([]);
+    return;
+  }
+
+  let lastMonth = null;
+  filtered.forEach(ev => {
+    const color    = catColor(ev.cat);
+    const catLabel = CAT_META[ev.cat]?.label || ev.cat;
+    const indLabel = ev.industry.map(i => INDUSTRY_MAP[i] || i).join(' / ');
+    const prio     = ev.priority >= 3 ? '🔥🔥🔥' : ev.priority === 2 ? '🔥🔥' : '🔥';
+    const chStr    = ev.channel.join('、');
+    const w        = weekOfYear(ev.month, ev.day);
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      ${ev.month !== lastMonth ? `<td class="cell-month">${ev.month} 月</td>` : '<td></td>'}
+      <td class="cell-muted">W${w}</td>
+      <td class="cell-muted">${ev.month}/${ev.day}</td>
+      <td>${highlightKeyword(ev.name, kw)}</td>
+      <td><span class="cat-badge-pill" style="background:${color}22;color:${color};border:1px solid ${color}55">${catLabel}</span></td>
+      <td>${prio}</td>
+      <td class="cell-muted">${ev.leadWeeks > 0 ? `提前 ${ev.leadWeeks} 週` : '—'}</td>
+      <td class="cell-muted">${indLabel}</td>
+      <td class="channel-list">${chStr}</td>`;
+    lastMonth = ev.month;
+    tbody.appendChild(tr);
+  });
+
+  updateStats(filtered);
+}
+
+// ============================================================
+// ⑭ renderHoliday() — 假日 & 節氣視圖
+// ============================================================
+function renderHoliday() {
+  // 國定假日表
+  document.getElementById('holidayBody').innerHTML =
+    APP_STATE.holidays.map(h => `
+      <tr>
+        <td><strong>${h.name}</strong></td>
+        <td>${h.date}</td>
+        <td>${h.comp !== '—' ? `<span class="comp-pill">${h.comp}</span>` : '—'}</td>
+        <td style="color:var(--text-muted);font-size:0.76rem">${h.period}</td>
+        <td><span class="days-pill">${h.days} 天</span></td>
+        <td style="color:var(--text-muted);font-size:0.75rem">${h.note}</td>
+      </tr>`).join('');
+
+  // 24 節氣 Grid
+  document.getElementById('solarGrid').innerHTML =
+    SOLAR_TERMS.map(t => `
+      <div class="solar-card">
+        <div class="sc-name">${t.name}</div>
+        <div class="sc-date">${t.month} / ${t.day}</div>
+      </div>`).join('');
+}
+
+// ============================================================
+// ⑮ renderCountdown() — 倒數計時橫幅
+// ============================================================
+function renderCountdown() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const inner = document.getElementById('countdownInner');
+
+  const upcoming = APP_STATE.events
+    .filter(e => e.priority >= 2)
+    .map(e => {
+      const d    = new Date(2026, e.month - 1, e.day);
+      const diff = Math.ceil((d - today) / 86400000);
+      return { ...e, diff };
+    })
+    .filter(e => e.diff >= 0)
+    .sort((a, b) => a.diff - b.diff)
+    .slice(0, 3);
+
+  if (upcoming.length === 0) {
+    inner.innerHTML = `<span class="countdown-label">2026 年所有行銷檔期已結束</span>`;
+    return;
+  }
+
+  inner.innerHTML = `<span class="countdown-label">即將到來：</span>` +
+    upcoming.map(e => {
+      const cls  = e.priority === 3 ? 'hot' : (e.priority === 2 ? 'warm' : 'normal');
+      const icon = e.priority === 3 ? '🔥' : (e.priority === 2 ? '🟠' : '📅');
+      const daysStr = e.diff === 0 ? '今天！' : `${e.diff} 天後`;
+      return `<div class="countdown-item ${cls}">${icon} <span><strong>${e.name}</strong> ${e.month}/${e.day}</span><span class="days">${daysStr}</span></div>`;
+    }).join('');
+}
+
+// ============================================================
+// ⑯ renderMonthNav() — 月份導航列
+// ============================================================
+function renderMonthNav() {
+  const nav = document.getElementById('monthNav');
+  nav.innerHTML = MONTH_ZH.map((zh, i) => `
+    <button class="month-btn" data-month="${i+1}" aria-label="${i+1}月">${i+1}月</button>`).join('');
+
+  nav.querySelectorAll('.month-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const m = +btn.dataset.month;
+      // 切換到卡片視圖並捲動
+      if (APP_STATE.view !== 'card') {
+        switchView('card');
+        setTimeout(() => document.getElementById(`month-${m}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      } else {
+        document.getElementById(`month-${m}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      setNavActive(m);
+    });
+  });
+
+  // 標記當前月
+  const cm = new Date().getFullYear() === 2026 ? new Date().getMonth() + 1 : null;
+  if (cm) setNavActive(cm);
+}
+
+function setNavActive(month) {
+  const nav = document.getElementById('monthNav');
+  nav.querySelectorAll('.month-btn').forEach(b => b.classList.toggle('active', +b.dataset.month === month));
+  const activeBtn = nav.querySelector(`[data-month="${month}"]`);
+  activeBtn?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+/** 使用 IntersectionObserver 隨捲動更新當前月 */
+function initScrollSpy() {
+  const cards = document.querySelectorAll('.month-card');
+  if (!cards.length) return;
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const m = +entry.target.id.replace('month-', '');
+        setNavActive(m);
+      }
+    });
+  }, { threshold: 0.25 });
+  cards.forEach(c => obs.observe(c));
+}
+
+// ============================================================
+// ⑰ switchView() — 視圖切換
+// ============================================================
+function switchView(view) {
+  APP_STATE.view = view;
+
+  ['card','list','holiday'].forEach(v => {
+    document.getElementById(`view-${v}`).classList.toggle('hidden', v !== view);
+  });
+  document.querySelectorAll('.view-tab').forEach(btn => {
+    const active = btn.dataset.view === view;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-selected', active);
+  });
+
+  if (view === 'card')    { renderCards();   setTimeout(initScrollSpy, 300); }
+  if (view === 'list')    renderList();
+  if (view === 'holiday') renderHoliday();
+
+  saveState();
+}
+
+/** 重新渲染當前視圖（篩選變更時呼叫） */
+function refreshView() {
+  if (APP_STATE.view === 'card') renderCards();
+  if (APP_STATE.view === 'list') renderList();
+  // holiday 視圖不受篩選影響，不重繪
+}
+
+// ============================================================
+// ⑱ 同步類別按鈕 UI
+// ============================================================
+function syncCatButtons() {
+  document.querySelectorAll('.cat-btn').forEach(btn => {
+    const cat    = btn.dataset.cat;
+    const active = APP_STATE.categories.has(cat);
+    btn.classList.toggle('active', active);
+    if (active) {
+      const cssVar = CAT_META[cat]?.cssVar || '--accent';
+      btn.style.background   = `var(${cssVar})`;
+      btn.style.borderColor  = `var(${cssVar})`;
+    } else {
+      btn.style.background  = '';
+      btn.style.borderColor = '';
+    }
+  });
+}
+
+// ============================================================
+// ⑲ 事件監聽器綁定
+// ============================================================
+function bindEvents() {
+  // 主題切換
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    document.getElementById('themeBtn').textContent = next === 'dark' ? '🌙' : '☀️';
+    saveState();
+  });
+
+  // 類別篩選（多選，至少保留一個）
+  document.getElementById('catGroup').addEventListener('click', e => {
+    const btn = e.target.closest('.cat-btn');
+    if (!btn) return;
+    const cat = btn.dataset.cat;
+    if (APP_STATE.categories.has(cat)) {
+      if (APP_STATE.categories.size <= 1) return; // 至少保留一個
+      APP_STATE.categories.delete(cat);
+    } else {
+      APP_STATE.categories.add(cat);
+    }
+    syncCatButtons();
+    saveState();
+    refreshView();
+  });
+
+  // 產業篩選
+  document.getElementById('industrySelect').addEventListener('change', e => {
+    APP_STATE.industry = e.target.value;
+    saveState();
+    refreshView();
+  });
+
+  // 搜尋（防抖 200ms）
+  let searchTimer;
+  document.getElementById('searchInput').addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      APP_STATE.search = e.target.value;
+      refreshView();
+    }, 200);
+  });
+
+  // 鍵盤快捷鍵
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      const inp = document.getElementById('searchInput');
+      inp.focus(); inp.select();
+    }
+    if (e.key === 'Escape') {
+      const inp = document.getElementById('searchInput');
+      inp.value = ''; inp.blur();
+      APP_STATE.search = '';
+      refreshView();
+    }
+  });
+
+  // 視圖切換
+  document.querySelectorAll('.view-tab').forEach(btn => {
+    btn.addEventListener('click', () => switchView(btn.dataset.view));
+  });
+}
+
+// ============================================================
+// ⑳ 初始化
+// ============================================================
+async function init() {
+  loadState();
+
+  // 同步 UI 與 loadState 後的狀態
+  document.getElementById('industrySelect').value = APP_STATE.industry;
+  syncCatButtons();
+
+  renderMonthNav();
+  renderCountdown();
+
+  // 嘗試從 Google Sheets 載入（CONFIG.USE_SHEETS = true 時生效）
+  await loadSheetData();
+
+  bindEvents();
+
+  // 初始視圖
+  switchView(APP_STATE.view);
+}
+
+init();
+</script>
+</body>
+</html>
