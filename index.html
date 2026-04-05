@@ -782,11 +782,12 @@
 //    並將 CSV 匯出網址的 gid 填入下方
 // ============================================================
 const CONFIG = {
-  SPREADSHEET_ID: 'YOUR_SPREADSHEET_ID_HERE', // ← 替換你的試算表 ID
-  GID_EVENTS:   '0',   // ALL_EVENTS 工作表 GID
-  GID_HOLIDAYS: '1',   // HOLIDAYS 工作表 GID
-  GID_CPM:      '2',   // CPM_ALERTS 工作表 GID
-  USE_SHEETS:   false, // 設為 true 啟用 Google Sheets 資料源
+  // 「發布到網路」取得的 Published ID（網址 /d/e/ 後面那段）
+  PUBLISHED_ID: '2PACX-1vQ_tAy2LdCTeOk7rkuzMqgOv-omJRT21oFiGFG9WffDtpepkIM0ubsPr1ILwduSby-Gbn1uSaxu_zSn',
+  GID_EVENTS:   '0',          // events 工作表 GID
+  GID_HOLIDAYS: '454226207',  // holidays 工作表 GID
+  GID_CPM:      '742683031',  // cpm 工作表 GID
+  USE_SHEETS:   true,
 };
 
 // ============================================================
@@ -1059,7 +1060,8 @@ function splitCSVRow(line) {
 
 /** 統一的 Sheets 抓取函式，含錯誤處理與 Fallback */
 async function fetchSheetData(gid) {
-  const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SPREADSHEET_ID}/export?format=csv&gid=${gid}`;
+  // 使用「發布到網路」的 pub URL，支援公開存取且無需登入
+  const url = `https://docs.google.com/spreadsheets/d/e/${CONFIG.PUBLISHED_ID}/pub?gid=${gid}&single=true&output=csv`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const text = await res.text();
