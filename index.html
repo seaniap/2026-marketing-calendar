@@ -3,8 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="2026 台灣行銷年度行事曆 — 節日、電商檔期、24節氣、國定假日一覽">
-  <title>2026 行銷年度行事曆</title>
+
+  <!-- SEO 基本 -->
+  <title>2026 行銷年度行事曆｜台灣節日、電商檔期、24節氣完整整理</title>
+  <meta name="description" content="2026 台灣行銷年度行事曆，整合國定假日、電商大促（618、雙11、黑五）、農曆節慶、24節氣與 CPM 廣告旺淡季提醒，行銷人員必備規劃工具。">
+  <meta name="keywords" content="2026行銷行事曆,台灣節日,電商檔期,618,雙11,黑色星期五,母親節,農曆春節,24節氣,行銷規劃,CPM,廣告排程">
+  <meta name="author" content="2026 行銷年度行事曆">
+  <link rel="canonical" href="https://seaniap.github.io/2026-marketing-calendar/">
+
+  <!-- Open Graph（Facebook / LINE 分享預覽） -->
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://seaniap.github.io/2026-marketing-calendar/">
+  <meta property="og:title"       content="2026 行銷年度行事曆｜台灣節日、電商檔期完整整理">
+  <meta property="og:description" content="整合 75+ 個台灣節日與電商檔期、24節氣、國定假日補假表與 CPM 廣告旺淡季提醒，行銷人員必備年度規劃工具。">
+  <meta property="og:locale"      content="zh_TW">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="2026 行銷年度行事曆">
+  <meta name="twitter:description" content="整合 75+ 個台灣節日、電商檔期、24節氣與 CPM 廣告旺淡季提醒。">
+
+  <!-- Schema.org 結構化資料 -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "2026 行銷年度行事曆",
+    "description": "台灣行銷人員專用的 2026 年度行事曆，整合國定假日、電商大促、農曆節慶、24節氣與 CPM 廣告提醒。",
+    "url": "https://seaniap.github.io/2026-marketing-calendar/",
+    "applicationCategory": "BusinessApplication",
+    "inLanguage": "zh-TW",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
   <style>
     /* ===================================================
        CSS Custom Properties — 所有顏色必須透過變數定義
@@ -617,13 +649,47 @@
        RWD
        =================================================== */
     @media (max-width: 768px) {
-      .search-wrap { width: 100%; }
+      /* Header */
+      .site-header { padding: 1rem 1rem 0.6rem; }
+      .site-header h1 { font-size: 1.25rem; padding-right: 2.5rem; }
+      .theme-btn { top: 0.7rem; right: 0.7rem; }
+      .header-stats { gap: 0.6rem; font-size: 0.78rem; }
+
+      /* 篩選器：折疊成兩行 */
+      .filters-section { padding: 0.6rem 0.75rem; }
+      .filters-row { gap: 0.5rem; }
+      .filter-label { font-size: 0.7rem; }
+      .cat-btn { font-size: 0.72rem; padding: 0.18rem 0.5rem; }
+      .search-wrap { width: 100%; order: 10; }
       .search-input { width: 100%; }
       .search-input:focus { width: 100%; }
-      .header-stats { gap: 0.8rem; }
-      .holiday-table { font-size: 0.73rem; }
-      .holiday-table td, .holiday-table th { padding: 0.38rem 0.4rem; }
-      .solar-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+
+      /* 倒數橫幅：垂直堆疊 */
+      .countdown-inner { gap: 0.5rem; }
+      .countdown-item { font-size: 0.73rem; padding: 0.25rem 0.6rem; }
+      .countdown-item .days { font-size: 0.95rem; }
+
+      /* 視圖切換 */
+      .view-tabs-wrap { padding: 0 0.75rem; gap: 0.4rem; }
+      .view-tab { font-size: 0.78rem; padding: 0.38rem 0.7rem; }
+
+      /* 主內容 */
+      .main-content { padding: 0.75rem; }
+
+      /* 假日表 */
+      .holiday-table { font-size: 0.7rem; }
+      .holiday-table td, .holiday-table th { padding: 0.35rem 0.35rem; }
+
+      /* 節氣格 */
+      .solar-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.45rem; }
+      .solar-card { padding: 0.45rem 0.5rem; }
+      .solar-card .sc-name { font-size: 0.85rem; }
+
+      /* 行銷規劃表：隱藏較次要欄位 */
+      .list-table th:nth-child(8),
+      .list-table td:nth-child(8),
+      .list-table th:nth-child(9),
+      .list-table td:nth-child(9) { display: none; }
     }
 
     /* ===================================================
