@@ -792,13 +792,106 @@
     }
 
     /* ===================================================
+       視圖 D — 列印視圖（螢幕預覽）
+       =================================================== */
+    .print-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .print-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-sm);
+      padding: 0.45rem 1rem;
+      font-size: 0.83rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity var(--trans);
+      font-family: inherit;
+    }
+    .print-btn:hover { opacity: 0.82; }
+    .print-hint { font-size: 0.72rem; color: var(--text-muted); }
+
+    .print-doc-header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.6rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .print-doc-title { font-size: 1.15rem; font-weight: 800; }
+    .print-filter-summary { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .print-doc-date { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
+
+    .print-quarter-group { margin-bottom: 1.5rem; }
+    .print-quarter-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent);
+      padding: 0.3rem 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+    }
+    .print-month-block { break-inside: avoid; margin-bottom: 0.65rem; }
+    .print-month-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.18rem 0;
+      color: var(--text-main);
+    }
+    .print-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.72rem;
+    }
+    .print-table th {
+      background: var(--bg-elevated);
+      text-align: left;
+      padding: 0.2rem 0.45rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.67rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .print-table td {
+      padding: 0.18rem 0.45rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .print-table .no-events td {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 0.7rem;
+    }
+
+    /* ===================================================
        Print
        =================================================== */
     @media print {
+      /* 隱藏控制元素 */
       .site-header, .month-nav, .filters-section,
       .countdown-banner, .view-tabs-wrap, .theme-btn,
-      .expand-btn, .loading-overlay { display: none !important; }
+      .expand-btn, .loading-overlay, .print-actions, footer { display: none !important; }
+      /* 強制亮色白底黑字（不受主題影響） */
+      [data-theme], [data-theme="dark"], [data-theme="light"] {
+        --bg-page: #fff;   --bg-card: #fff;   --bg-elevated: #f5f5f5;
+        --text-main: #000; --text-muted: #555; --border: #ccc;
+        --accent: #333;    --accent-bg: #eee;  --shadow: none;
+      }
+      body { font-size: 10pt; }
+      @page { size: A4 portrait; margin: 1.5cm; }
+      /* 月份卡片（從非列印視圖直接 Cmd+P 時的 degrade） */
       .month-card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+      /* 列印視圖分頁：一季一頁 */
+      .print-quarter-group { break-after: page; }
+      .print-quarter-group.last { break-after: avoid; }
+      .print-table, .print-table th, .print-table td { border-color: #ccc !important; }
     }
   </style>
 </head>
@@ -879,6 +972,7 @@
   <button class="view-tab active" data-view="card"    role="tab" aria-selected="true">📋 月份卡片</button>
   <button class="view-tab"        data-view="list"    role="tab" aria-selected="false">📊 行銷規劃表</button>
   <button class="view-tab"        data-view="holiday" role="tab" aria-selected="false">🗓 假日 & 節氣</button>
+  <button class="view-tab"        data-view="print"   role="tab" aria-selected="false">🖨 列印</button>
 </div>
 
 <!-- ===================================================
@@ -932,6 +1026,15 @@
       <h2 class="section-title">☀️ 2026 年 24 節氣</h2>
       <div class="solar-grid" id="solarGrid"></div>
     </div>
+  </div>
+
+  <!-- 視圖 D：列印視圖 -->
+  <div id="view-print" class="hidden">
+    <div class="print-actions">
+      <button class="print-btn" onclick="window.print()">🖨 列印 / 另存 PDF</button>
+      <span class="print-hint">（Cmd/Ctrl+P 亦可開啟列印對話框）</span>
+    </div>
+    <div id="printContent"></div>
   </div>
 
 </main>
@@ -1720,10 +1823,75 @@ function initScrollSpy() {
 // ============================================================
 // ⑰ switchView() — 視圖切換
 // ============================================================
+// ============================================================
+// ⑰ renderPrint() — 列印視圖
+// ============================================================
+const QUARTER_MONTHS = [[1,2,3],[4,5,6],[7,8,9],[10,11,12]];
+
+function renderPrint() {
+  const container = document.getElementById('printContent');
+  const filtered  = filterEvents();
+  const today     = new Date();
+  const dateStr   = `${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}`;
+
+  // 篩選條件摘要
+  const allCats = Object.keys(CAT_META);
+  const catStr = APP_STATE.categories.size === allCats.length
+    ? '全部類別'
+    : [...APP_STATE.categories].map(c => CAT_META[c]?.label).join('、');
+  const indStr  = INDUSTRY_MAP[APP_STATE.industry] || '全產業';
+  const parts   = [`類別：${catStr}`, `產業：${indStr}`];
+  if (APP_STATE.search.trim()) parts.push(`搜尋：${APP_STATE.search.trim()}`);
+
+  let html = `
+    <div class="print-doc-header">
+      <div>
+        <div class="print-doc-title">📅 2026 行銷年度行事曆</div>
+        <div class="print-filter-summary">${parts.join('　|　')}</div>
+      </div>
+      <div class="print-doc-date">產出日期：${dateStr}</div>
+    </div>
+  `;
+
+  QUARTER_MONTHS.forEach((months, qi) => {
+    const isLast = qi === 3;
+    const qLabel = `Q${qi+1}（${months[0]}–${months[2]} 月）`;
+    html += `<div class="print-quarter-group${isLast ? ' last' : ''}">`;
+    html += `<div class="print-quarter-title">${qLabel}</div>`;
+
+    months.forEach(m => {
+      const mEvents = filtered
+        .filter(e => e.month === m)
+        .sort((a, b) => a.day - b.day || b.priority - a.priority);
+
+      html += `<div class="print-month-block">`;
+      html += `<div class="print-month-title">${m} 月 ${MONTH_ZH[m-1]}（${MONTH_EN[m-1]}）</div>`;
+      html += `<table class="print-table"><thead><tr><th>日期</th><th>名稱</th><th>類別</th><th>優先度</th><th>提前準備</th><th>建議渠道</th></tr></thead><tbody>`;
+
+      if (mEvents.length === 0) {
+        html += `<tr class="no-events"><td colspan="6">本月無符合條件的事件</td></tr>`;
+      } else {
+        mEvents.forEach(ev => {
+          const prio = ev.priority >= 3 ? '★★★ 高' : ev.priority === 2 ? '★★ 中' : '★ 低';
+          const lead = (ev.leadWeeks || 0) > 0 ? `提前 ${ev.leadWeeks}W` : '—';
+          const ch   = (ev.channel || []).join('、') || '—';
+          html += `<tr><td>${ev.month}/${ev.day}</td><td>${ev.name}</td><td>${CAT_META[ev.cat]?.label || ev.cat}</td><td>${prio}</td><td>${lead}</td><td>${ch}</td></tr>`;
+        });
+      }
+
+      html += `</tbody></table></div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+}
+
 function switchView(view) {
   APP_STATE.view = view;
 
-  ['card','list','holiday'].forEach(v => {
+  ['card','list','holiday','print'].forEach(v => {
     document.getElementById(`view-${v}`).classList.toggle('hidden', v !== view);
   });
   document.querySelectorAll('.view-tab').forEach(btn => {
@@ -1735,14 +1903,16 @@ function switchView(view) {
   if (view === 'card')    { renderQuarterOverview(); renderCards(); setTimeout(initScrollSpy, 300); }
   if (view === 'list')    renderList();
   if (view === 'holiday') renderHoliday();
+  if (view === 'print')   renderPrint();
 
   saveState();
 }
 
 /** 重新渲染當前視圖（篩選變更時呼叫） */
 function refreshView() {
-  if (APP_STATE.view === 'card') { renderQuarterOverview(); renderCards(); }
-  if (APP_STATE.view === 'list') renderList();
+  if (APP_STATE.view === 'card')  { renderQuarterOverview(); renderCards(); }
+  if (APP_STATE.view === 'list')  renderList();
+  if (APP_STATE.view === 'print') renderPrint();
   // holiday 視圖不受篩選影響，不重繪
 }
 
