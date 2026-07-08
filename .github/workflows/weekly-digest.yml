@@ -1,0 +1,20 @@
+name: 週報 bot — 行銷週報推送
+
+on:
+  schedule:
+    - cron: '0 1 * * 1'   # 週一 09:00 Asia/Taipei（UTC+8）
+  workflow_dispatch:        # 允許手動觸發（測試用）
+
+jobs:
+  send-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run weekly digest
+        env:
+          DIGEST_WEBHOOK_URL: ${{ secrets.DIGEST_WEBHOOK_URL }}
+          DIGEST_PLATFORM: ${{ vars.DIGEST_PLATFORM }}
+          LINE_CHANNEL_ID: ${{ secrets.LINE_CHANNEL_ID }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: python3 scripts/weekly_digest.py
