@@ -693,6 +693,67 @@
     }
 
     /* ===================================================
+       Q1–Q4 季度概覽面板
+       =================================================== */
+    .quarter-overview {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 768px) {
+      .quarter-overview { grid-template-columns: repeat(2, 1fr); }
+    }
+    .quarter-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 0.75rem 0.85rem 0.65rem;
+      cursor: pointer;
+      transition: box-shadow var(--trans), border-color var(--trans);
+      user-select: none;
+    }
+    .quarter-panel:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+    .quarter-panel:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .quarter-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.45rem;
+    }
+    .quarter-panel-title { font-weight: 700; font-size: 0.85rem; color: var(--accent); }
+    .quarter-fire { font-size: 0.8rem; }
+    .quarter-events { list-style: none; margin: 0; padding: 0; }
+    .quarter-event-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      padding: 0.1rem 0;
+    }
+    .quarter-event-date { color: var(--text-muted); flex-shrink: 0; min-width: 2.2rem; }
+    .quarter-event-name { flex: 1; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .quarter-topics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      margin-top: 0.45rem;
+    }
+    .quarter-topic-tag {
+      font-size: 0.63rem;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.04);
+      border-radius: 3px;
+      padding: 0.06rem 0.32rem;
+    }
+    .quarter-empty {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 0.3rem;
+    }
+
+    /* ===================================================
        Print
        =================================================== */
     @media print {
@@ -789,6 +850,7 @@
 
   <!-- 視圖 A：月份卡片 -->
   <div id="view-card">
+    <div id="quarterOverview" class="quarter-overview" role="navigation" aria-label="季度概覽"></div>
     <div class="cards-grid" id="cardsGrid"></div>
   </div>
 
@@ -1230,7 +1292,99 @@ function updateStats(filtered) {
 }
 
 // ============================================================
-// ⑫ renderCards() — 月份卡片視圖
+// ⑫ renderQuarterOverview() — Q1–Q4 季度概覽面板
+// ============================================================
+const QUARTER_CONFIG = [
+  { q: 'Q1', months: [1, 2, 3],    label: 'Q1 (1–3月)'   },
+  { q: 'Q2', months: [4, 5, 6],    label: 'Q2 (4–6月)'   },
+  { q: 'Q3', months: [7, 8, 9],    label: 'Q3 (7–9月)'   },
+  { q: 'Q4', months: [10, 11, 12], label: 'Q4 (10–12月)' },
+];
+
+const CPM_LEVEL_ORDER = { extreme: 4, high: 3, medium: 2, low: 1, normal: 0 };
+const CPM_FIRE_LABEL  = { extreme: '🔥🔥🔥', high: '🔥🔥', medium: '🔥' };
+
+function renderQuarterOverview() {
+  const container = document.getElementById('quarterOverview');
+  const filtered  = filterEvents();
+
+  container.innerHTML = '';
+
+  QUARTER_CONFIG.forEach(({ months, label }) => {
+    const qEvents = filtered.filter(e => months.includes(e.month));
+
+    // 火焰熱度：取該季 3 個月 CPM level 最高者
+    const maxLevel = months.reduce((best, m) => {
+      const lv = APP_STATE.cpm[m]?.level || 'normal';
+      return (CPM_LEVEL_ORDER[lv] ?? 0) > (CPM_LEVEL_ORDER[best] ?? 0) ? lv : best;
+    }, 'normal');
+    const fire = CPM_FIRE_LABEL[maxLevel] || '';
+
+    // 重點事件：priority 降冪、日期升冪，取前 4 筆
+    const topEvents = [...qEvents]
+      .sort((a, b) => b.priority - a.priority || a.month - b.month || a.day - b.day)
+      .slice(0, 4);
+
+    // 議題標籤：priority >= 2 事件的 topics 去重，取前 5 個
+    const topics = [...new Set(
+      qEvents.filter(e => e.priority >= 2).flatMap(e => e.topics)
+    )].slice(0, 5);
+
+    const panel = document.createElement('div');
+    panel.className = 'quarter-panel';
+    panel.setAttribute('role', 'button');
+    panel.setAttribute('tabindex', '0');
+    panel.setAttribute('aria-label', `${label}，點擊跳至該季第一個月`);
+
+    let html = `<div class="quarter-panel-header">
+      <span class="quarter-panel-title">${label}</span>
+      ${fire ? `<span class="quarter-fire">${fire}</span>` : ''}
+    </div>`;
+
+    if (qEvents.length === 0) {
+      html += `<p class="quarter-empty">本季無符合事件</p>`;
+    } else {
+      html += `<ul class="quarter-events">` +
+        topEvents.map(ev => `
+          <li class="quarter-event-item">
+            <span class="quarter-event-date">${ev.month}/${ev.day}</span>
+            <span class="cat-dot" style="background:${catColor(ev.cat)}" title="${CAT_META[ev.cat]?.label}"></span>
+            <span class="quarter-event-name">${ev.name}</span>
+          </li>`).join('') +
+        `</ul>`;
+      if (topics.length > 0) {
+        html += `<div class="quarter-topics">` +
+          topics.map(t => `<span class="quarter-topic-tag">#${t}</span>`).join('') +
+          `</div>`;
+      }
+    }
+
+    panel.innerHTML = html;
+
+    // 點擊平滑捲動至該季第一個月
+    const scrollToFirst = () => {
+      const doScroll = () => {
+        const el = document.getElementById(`month-${months[0]}`);
+        if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: 'smooth' });
+      };
+      if (APP_STATE.view !== 'card') {
+        switchView('card');
+        setTimeout(doScroll, 100);
+      } else {
+        doScroll();
+      }
+    };
+    panel.addEventListener('click', scrollToFirst);
+    panel.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); scrollToFirst(); }
+    });
+
+    container.appendChild(panel);
+  });
+}
+
+// ============================================================
+// ⑬ renderCards() — 月份卡片視圖
 // ============================================================
 function renderCards() {
   const grid   = document.getElementById('cardsGrid');
@@ -1506,7 +1660,7 @@ function switchView(view) {
     btn.setAttribute('aria-selected', active);
   });
 
-  if (view === 'card')    { renderCards();   setTimeout(initScrollSpy, 300); }
+  if (view === 'card')    { renderQuarterOverview(); renderCards(); setTimeout(initScrollSpy, 300); }
   if (view === 'list')    renderList();
   if (view === 'holiday') renderHoliday();
 
@@ -1515,7 +1669,7 @@ function switchView(view) {
 
 /** 重新渲染當前視圖（篩選變更時呼叫） */
 function refreshView() {
-  if (APP_STATE.view === 'card') renderCards();
+  if (APP_STATE.view === 'card') { renderQuarterOverview(); renderCards(); }
   if (APP_STATE.view === 'list') renderList();
   // holiday 視圖不受篩選影響，不重繪
 }
