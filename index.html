@@ -693,6 +693,44 @@
     }
 
     /* ===================================================
+       Countdown Banner — F2 擴充
+       =================================================== */
+    /* 整月旺季警示列（full-width，置於倒數項目之上） */
+    .cpm-month-alert {
+      width: 100%;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.28rem 0.6rem;
+      border-radius: var(--r-sm);
+      border-left: 3px solid;
+      margin-bottom: 0.1rem;
+    }
+    .cpm-month-alert.high    { background: var(--cpm-high-bg); color: var(--cpm-high-txt); border-color: var(--cpm-high-txt); }
+    .cpm-month-alert.extreme { background: var(--cpm-high-bg); color: var(--cpm-high-txt); border-color: var(--cpm-high-txt); }
+
+    /* CPM level 徽章（內嵌於倒數項目） */
+    .cpm-badge {
+      border-radius: 3px;
+      padding: 0.04rem 0.35rem;
+      font-size: 0.63rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .cpm-badge.extreme { background: var(--cpm-high-bg); color: var(--cpm-high-txt); }
+    .cpm-badge.high    { background: var(--cpm-high-bg); color: var(--cpm-high-txt); }
+    .cpm-badge.medium  { background: var(--cpm-med-bg);  color: var(--cpm-med-txt);  }
+
+    /* 準備提醒文字 */
+    .lead-hint {
+      font-size: 0.67rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .lead-hint.urgent { color: var(--color-local); font-weight: 600; }
+
+    /* ===================================================
        Q1–Q4 季度概覽面板
        =================================================== */
     .quarter-overview {
@@ -1565,35 +1603,69 @@ function renderHoliday() {
 }
 
 // ============================================================
-// ⑮ renderCountdown() — 倒數計時橫幅
+// ⑮ renderCountdown() — 倒數計時橫幅（F2 擴充：CPM 徽章 + Lead Time）
 // ============================================================
+const CPM_BADGE_LABEL = { extreme: '🔴 極旺季', high: '🔴 旺季', medium: '🟡 中旺季' };
+
 function renderCountdown() {
   const today = new Date(); today.setHours(0,0,0,0);
   const inner = document.getElementById('countdownInner');
+  const curMonth = today.getFullYear() === 2026 ? today.getMonth() + 1 : null;
 
   const upcoming = APP_STATE.events
     .filter(e => e.priority >= 2)
     .map(e => {
-      const d    = new Date(2026, e.month - 1, e.day);
-      const diff = Math.ceil((d - today) / 86400000);
-      return { ...e, diff };
+      const eventDate  = new Date(2026, e.month - 1, e.day);
+      const diff       = Math.ceil((eventDate - today) / 86400000);
+      const prepDate   = new Date(eventDate.getTime() - (e.leadWeeks || 0) * 7 * 86400000);
+      const daysToPrep = Math.ceil((prepDate - today) / 86400000);
+      return { ...e, diff, daysToPrep };
     })
     .filter(e => e.diff >= 0)
     .sort((a, b) => a.diff - b.diff)
     .slice(0, 3);
 
+  let html = '';
+
+  // ① 整月 CPM 旺季警示列（high / extreme 才顯示）
+  if (curMonth) {
+    const curCpm = APP_STATE.cpm[curMonth];
+    if (curCpm && (curCpm.level === 'high' || curCpm.level === 'extreme')) {
+      html += `<div class="cpm-month-alert ${curCpm.level}">${curCpm.msg}</div>`;
+    }
+  }
+
   if (upcoming.length === 0) {
-    inner.innerHTML = `<span class="countdown-label">2026 年所有行銷檔期已結束</span>`;
+    html += `<span class="countdown-label">2026 年所有行銷檔期已結束</span>`;
+    inner.innerHTML = html;
     return;
   }
 
-  inner.innerHTML = `<span class="countdown-label">即將到來：</span>` +
-    upcoming.map(e => {
-      const cls  = e.priority === 3 ? 'hot' : (e.priority === 2 ? 'warm' : 'normal');
-      const icon = e.priority === 3 ? '🔥' : (e.priority === 2 ? '🟠' : '📅');
-      const daysStr = e.diff === 0 ? '今天！' : `${e.diff} 天後`;
-      return `<div class="countdown-item ${cls}">${icon} <span><strong>${e.name}</strong> ${e.month}/${e.day}</span><span class="days">${daysStr}</span></div>`;
-    }).join('');
+  html += `<span class="countdown-label">即將到來：</span>`;
+
+  html += upcoming.map(e => {
+    const cls  = e.priority === 3 ? 'hot' : 'warm';
+    const icon = e.priority === 3 ? '🔥' : '🟠';
+    const daysStr = e.diff === 0 ? '今天！' : `${e.diff} 天後`;
+
+    // ② CPM 徽章（normal / low 不顯示）
+    const cpm = APP_STATE.cpm[e.month];
+    const cpmBadge = (cpm && CPM_BADGE_LABEL[cpm.level])
+      ? `<span class="cpm-badge ${cpm.level}">${CPM_BADGE_LABEL[cpm.level]}</span>`
+      : '';
+
+    // ③ 準備提醒（leadWeeks > 0 才計算）
+    let leadHtml = '';
+    if ((e.leadWeeks || 0) > 0) {
+      leadHtml = e.daysToPrep > 0
+        ? `<span class="lead-hint">📋 ${e.daysToPrep} 天後開始準備</span>`
+        : `<span class="lead-hint urgent">⚠️ 已進入準備期（建議提前 ${e.leadWeeks} 週）</span>`;
+    }
+
+    return `<div class="countdown-item ${cls}">${icon} <span><strong>${e.name}</strong> ${e.month}/${e.day}</span>${cpmBadge}<span class="days">${daysStr}</span>${leadHtml}</div>`;
+  }).join('');
+
+  inner.innerHTML = html;
 }
 
 // ============================================================
