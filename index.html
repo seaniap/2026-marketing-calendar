@@ -191,6 +191,20 @@
       transition: all var(--trans);
     }
     .theme-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .export-ics-btn {
+      margin-top: 0.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0.3rem 0.75rem;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all var(--trans);
+      white-space: nowrap;
+    }
+    .export-ics-btn:hover { color: var(--accent); border-color: var(--accent); }
 
     /* ===================================================
        Month Navigation
@@ -914,6 +928,7 @@
     <span class="stat-chip">節氣 <strong>24</strong> 個</span>
     <span class="stat-chip">電商檔期 <strong id="statEc">—</strong> 個</span>
   </div>
+  <button class="export-ics-btn" id="exportIcsBtn" aria-label="匯出 .ics 行事曆">📅 匯出 .ics</button>
 </header>
 
 <!-- ===================================================
@@ -1936,9 +1951,127 @@ function syncCatButtons() {
 }
 
 // ============================================================
-// ⑲ 事件監聽器綁定
+// ============================================================
+// ⑲ .ics 匯出（F4）
+// ============================================================
+const CAT_EMOJI = { tw: '🇹🇼', ec: '🛒', local: '📍', intl: '🌍', life: '📚' };
+
+function icsEscape(str) {
+  return String(str ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\n/g, '\\n');
+}
+
+function icsFold(line) {
+  const enc = new TextEncoder();
+  const bytes = enc.encode(line);
+  if (bytes.length <= 75) return line + '\r\n';
+  let result = '', pos = 0, first = true;
+  while (pos < bytes.length) {
+    const limit = first ? 75 : 74;
+    let end = Math.min(pos + limit, bytes.length);
+    while (end < bytes.length && (bytes[end] & 0xC0) === 0x80) end--;
+    result += (first ? '' : ' ') + new TextDecoder().decode(bytes.slice(pos, end)) + '\r\n';
+    pos = end; first = false;
+  }
+  return result;
+}
+
+function icsDate(y, m, d) {
+  return `${y}${String(m).padStart(2,'0')}${String(d).padStart(2,'0')}`;
+}
+function icsNextDate(y, m, d) {
+  const nd = new Date(y, m - 1, d + 1);
+  return icsDate(nd.getFullYear(), nd.getMonth() + 1, nd.getDate());
+}
+
+function exportICS() {
+  const filtered  = filterEvents();
+  const indLabel  = INDUSTRY_MAP[APP_STATE.industry] || '全部';
+  const filename  = `2026行銷行事曆_${indLabel}.ics`;
+
+  const now = new Date();
+  const dtStamp = [
+    now.getUTCFullYear(),
+    String(now.getUTCMonth()+1).padStart(2,'0'),
+    String(now.getUTCDate()).padStart(2,'0'), 'T',
+    String(now.getUTCHours()).padStart(2,'0'),
+    String(now.getUTCMinutes()).padStart(2,'0'),
+    String(now.getUTCSeconds()).padStart(2,'0'), 'Z',
+  ].join('');
+
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//marketing-calendar//2026//ZH-TW',
+    'CALSCALE:GREGORIAN',
+    `X-WR-CALNAME:2026 行銷行事曆（${indLabel}）`,
+    'X-WR-TIMEZONE:Asia/Taipei',
+  ];
+
+  filtered.forEach(ev => {
+    const emoji   = CAT_EMOJI[ev.cat] || '';
+    const prio    = ev.priority >= 3 ? '★★★ 高' : ev.priority === 2 ? '★★ 中' : '★ 低';
+    const topics  = (ev.topics  || []).map(t => '#' + t).join(' ');
+    const ch      = (ev.channel || []).join('、');
+    const descParts = [
+      `類別：${CAT_META[ev.cat]?.label || ev.cat}`,
+      `優先度：${prio}`,
+      (ev.leadWeeks || 0) > 0 ? `建議提前：${ev.leadWeeks} 週` : null,
+      topics ? `議題：${topics}` : null,
+      ch     ? `建議渠道：${ch}` : null,
+    ].filter(Boolean);
+
+    lines.push(
+      'BEGIN:VEVENT',
+      `UID:${icsEscape(ev.id)}@marketing-calendar-2026`,
+      `DTSTAMP:${dtStamp}`,
+      `DTSTART;VALUE=DATE:${icsDate(2026, ev.month, ev.day)}`,
+      `DTEND;VALUE=DATE:${icsNextDate(2026, ev.month, ev.day)}`,
+      `SUMMARY:${icsEscape(`${emoji} ${ev.name}`)}`,
+      `DESCRIPTION:${icsEscape(descParts.join('\n'))}`,
+      'END:VEVENT',
+    );
+
+    // 提前準備提醒事件
+    if (ev.priority >= 2 && (ev.leadWeeks || 0) > 0) {
+      const prepD = new Date(2026, ev.month - 1, ev.day - ev.leadWeeks * 7);
+      const py = prepD.getFullYear(), pm = prepD.getMonth() + 1, pd = prepD.getDate();
+      lines.push(
+        'BEGIN:VEVENT',
+        `UID:${icsEscape(ev.id)}-prep@marketing-calendar-2026`,
+        `DTSTAMP:${dtStamp}`,
+        `DTSTART;VALUE=DATE:${icsDate(py, pm, pd)}`,
+        `DTEND;VALUE=DATE:${icsNextDate(py, pm, pd)}`,
+        `SUMMARY:${icsEscape(`🔔【開始準備】${ev.name}（${ev.leadWeeks} 週後）`)}`,
+        'END:VEVENT',
+      );
+    }
+  });
+
+  lines.push('END:VCALENDAR');
+
+  const icsContent = lines.map(icsFold).join('');
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// ⑳ 事件監聽器綁定
 // ============================================================
 function bindEvents() {
+  // .ics 匯出
+  document.getElementById('exportIcsBtn').addEventListener('click', exportICS);
+
   // 主題切換
   document.getElementById('themeBtn').addEventListener('click', () => {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
